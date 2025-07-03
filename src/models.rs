@@ -22,6 +22,8 @@ pub struct Relation {
 /// 标签查询参数
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct TagQueryParams {
+    #[schemars(description = "项目根目录路径")]
+    pub project_path: String,
     #[schemars(description = "标签查询表达式，支持 AND、NOT、通配符")]
     pub query: String,
 }
@@ -29,7 +31,9 @@ pub struct TagQueryParams {
 /// 添加标签参数
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct AddTagsParams {
-    #[schemars(description = "文件路径")]
+    #[schemars(description = "项目根目录路径")]
+    pub project_path: String,
+    #[schemars(description = "文件路径（相对于项目根目录）")]
     pub file_path: String,
     #[schemars(description = "标签列表，格式为 type:value")]
     pub tags: Vec<String>,
@@ -38,7 +42,9 @@ pub struct AddTagsParams {
 /// 移除标签参数
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct RemoveTagsParams {
-    #[schemars(description = "文件路径")]
+    #[schemars(description = "项目根目录路径")]
+    pub project_path: String,
+    #[schemars(description = "文件路径（相对于项目根目录）")]
     pub file_path: String,
     #[schemars(description = "要移除的标签列表")]
     pub tags: Vec<String>,
@@ -47,7 +53,9 @@ pub struct RemoveTagsParams {
 /// 添加注释参数
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct AddCommentParams {
-    #[schemars(description = "文件路径")]
+    #[schemars(description = "项目根目录路径")]
+    pub project_path: String,
+    #[schemars(description = "文件路径（相对于项目根目录）")]
     pub file_path: String,
     #[schemars(description = "注释内容")]
     pub comment: String,
@@ -56,9 +64,11 @@ pub struct AddCommentParams {
 /// 添加关联关系参数
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct AddRelationParams {
-    #[schemars(description = "源文件路径")]
+    #[schemars(description = "项目根目录路径")]
+    pub project_path: String,
+    #[schemars(description = "源文件路径（相对于项目根目录）")]
     pub from_file: String,
-    #[schemars(description = "目标文件路径")]
+    #[schemars(description = "目标文件路径（相对于项目根目录）")]
     pub to_file: String,
     #[schemars(description = "关联关系描述")]
     pub description: String,
@@ -67,17 +77,28 @@ pub struct AddRelationParams {
 /// 移除关联关系参数
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct RemoveRelationParams {
-    #[schemars(description = "源文件路径")]
+    #[schemars(description = "项目根目录路径")]
+    pub project_path: String,
+    #[schemars(description = "源文件路径（相对于项目根目录）")]
     pub from_file: String,
-    #[schemars(description = "目标文件路径")]
+    #[schemars(description = "目标文件路径（相对于项目根目录）")]
     pub to_file: String,
 }
 
 /// 文件路径参数
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct FilePathParams {
-    #[schemars(description = "文件路径")]
+    #[schemars(description = "项目根目录路径")]
+    pub project_path: String,
+    #[schemars(description = "文件路径（相对于项目根目录）")]
     pub file_path: String,
+}
+
+/// 项目路径参数
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct ProjectPathParams {
+    #[schemars(description = "项目根目录路径")]
+    pub project_path: String,
 }
 
 /// 查询结果
