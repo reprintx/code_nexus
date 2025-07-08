@@ -14,7 +14,7 @@ use std::io::Write;
 use chrono::Local;
 
 /// 调试开关常量
-const DEBUG_ENABLED: bool = true;
+const DEBUG_ENABLED: bool = false;
 
 /// 写入调试日志到文件
 fn write_debug_log(message: &str, project_path: Option<&str>) {
