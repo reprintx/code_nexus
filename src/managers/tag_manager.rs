@@ -222,17 +222,65 @@ impl TagManager {
 
     /// 根据标签查询文件
     pub fn query_files_by_tags(&self, query: &str) -> Result<Vec<String>> {
-        // 简单的查询实现，支持单个标签和 AND 操作
         let query = query.trim();
-        
+
         if query.is_empty() {
             return Ok(Vec::new());
         }
 
-        // 处理 AND 查询
+        // 解析并执行查询
+        let result = self.parse_and_execute_query(query)?;
+        let mut files: Vec<String> = result.into_iter().collect();
+        files.sort();
+        Ok(files)
+    }
+
+    /// 解析并执行查询表达式
+    fn parse_and_execute_query(&self, query: &str) -> Result<std::collections::HashSet<String>> {
+        // 处理 OR 操作（优先级最低）
+        if query.contains(" OR ") {
+            let parts: Vec<&str> = query.split(" OR ").map(|s| s.trim()).collect();
+            let mut result = std::collections::HashSet::new();
+            for part in parts {
+                let part_result = self.parse_and_execute_query(part)?;
+                result.extend(part_result);
+            }
+            return Ok(result);
+        }
+
+        // 处理 AND 操作
         if query.contains(" AND ") {
-            let tags: Vec<&str> = query.split(" AND ").map(|s| s.trim()).collect();
-            return self.query_files_with_and(&tags);
+            let parts: Vec<&str> = query.split(" AND ").map(|s| s.trim()).collect();
+            let mut result = None;
+            for part in parts {
+                let part_result = self.parse_and_execute_query(part)?;
+                match result {
+                    None => result = Some(part_result),
+                    Some(ref mut current) => {
+                        *current = current.intersection(&part_result).cloned().collect();
+                    }
+                }
+            }
+            return Ok(result.unwrap_or_default());
+        }
+
+        // 处理 NOT 操作
+        if query.starts_with("NOT ") {
+            let inner_query = &query[4..].trim();
+            let inner_result = self.parse_and_execute_query(inner_query)?;
+            let all_files: std::collections::HashSet<String> = self.file_tags.keys().cloned().collect();
+            return Ok(all_files.difference(&inner_result).cloned().collect());
+        }
+
+        // 处理括号表达式
+        if query.starts_with('(') && query.ends_with(')') {
+            let inner_query = &query[1..query.len()-1];
+            return self.parse_and_execute_query(inner_query);
+        }
+
+        // 处理通配符查询
+        if query.contains('*') {
+            return self.execute_wildcard_query(query);
         }
 
         // 单个标签查询
@@ -242,31 +290,69 @@ impl TagManager {
             .unwrap_or_default())
     }
 
-    /// AND 查询实现
-    fn query_files_with_and(&self, tags: &[&str]) -> Result<Vec<String>> {
-        if tags.is_empty() {
-            return Ok(Vec::new());
-        }
+    /// 执行通配符查询
+    fn execute_wildcard_query(&self, pattern: &str) -> Result<std::collections::HashSet<String>> {
+        let mut result = std::collections::HashSet::new();
 
-        // 获取第一个标签的文件集合
-        let mut result_files = self.tag_to_files
-            .get(tags[0])
-            .cloned()
-            .unwrap_or_default();
-
-        // 与其他标签的文件集合求交集
-        for &tag in &tags[1..] {
-            if let Some(tag_files) = self.tag_to_files.get(tag) {
-                result_files = result_files.intersection(tag_files).cloned().collect();
-            } else {
-                return Ok(Vec::new()); // 如果任何标签不存在，结果为空
+        // 简单的通配符实现：支持 * 匹配任意字符
+        for tag in self.tag_to_files.keys() {
+            if self.wildcard_match(pattern, tag) {
+                if let Some(files) = self.tag_to_files.get(tag) {
+                    result.extend(files.iter().cloned());
+                }
             }
         }
 
-        let mut result: Vec<String> = result_files.into_iter().collect();
-        result.sort();
         Ok(result)
     }
+
+    /// 简单的通配符匹配实现
+    fn wildcard_match(&self, pattern: &str, text: &str) -> bool {
+        // 如果模式中没有通配符，直接比较
+        if !pattern.contains('*') {
+            return pattern == text;
+        }
+
+        // 将模式按 * 分割
+        let parts: Vec<&str> = pattern.split('*').collect();
+
+        // 如果只有一个部分，说明没有 *
+        if parts.len() == 1 {
+            return pattern == text;
+        }
+
+        let mut text_pos = 0;
+
+        // 检查第一部分（如果不为空）
+        if !parts[0].is_empty() {
+            if !text.starts_with(parts[0]) {
+                return false;
+            }
+            text_pos += parts[0].len();
+        }
+
+        // 检查最后一部分（如果不为空）
+        if !parts[parts.len() - 1].is_empty() {
+            if !text.ends_with(parts[parts.len() - 1]) {
+                return false;
+            }
+        }
+
+        // 检查中间部分
+        for i in 1..parts.len() - 1 {
+            if !parts[i].is_empty() {
+                if let Some(pos) = text[text_pos..].find(parts[i]) {
+                    text_pos += pos + parts[i].len();
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
+
 
     /// 获取未标记的文件
     pub fn get_untagged_files(&self) -> Vec<String> {
