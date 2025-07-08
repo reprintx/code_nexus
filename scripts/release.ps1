@@ -63,7 +63,8 @@ if ($currentBranch -ne "main" -and $currentBranch -ne "master" -and -not $DryRun
 Write-Info "📝 更新 Cargo.toml 版本到 $Version"
 if (-not $DryRun) {
     $cargoContent = Get-Content "Cargo.toml" -Raw
-    $cargoContent = $cargoContent -replace 'version = "[^"]*"', "version = `"$Version`""
+    # 只更新 [package] 部分的 version，使用更精确的正则表达式
+    $cargoContent = $cargoContent -replace '(\[package\][\s\S]*?)version\s*=\s*"[^"]*"', "`$1version = `"$Version`""
     Set-Content "Cargo.toml" -Value $cargoContent -NoNewline
 }
 

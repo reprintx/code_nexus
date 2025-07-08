@@ -81,13 +81,13 @@ fi
 # 更新 Cargo.toml 中的版本
 log_info "📝 更新 Cargo.toml 版本到 $VERSION"
 if [ "$DRY_RUN" = false ]; then
-    # 使用 sed 更新版本
+    # 使用 sed 更新版本，只更新 [package] 部分的第一个 version
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
-        sed -i '' "s/^version = \"[^\"]*\"/version = \"$VERSION\"/" Cargo.toml
+        sed -i '' '/^\[package\]/,/^\[/ { /^version = / { s/^version = "[^"]*"/version = "'"$VERSION"'"/; } }' Cargo.toml
     else
         # Linux
-        sed -i "s/^version = \"[^\"]*\"/version = \"$VERSION\"/" Cargo.toml
+        sed -i '/^\[package\]/,/^\[/ { /^version = / { s/^version = "[^"]*"/version = "'"$VERSION"'"/; } }' Cargo.toml
     fi
 fi
 
