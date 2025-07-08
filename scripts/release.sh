@@ -119,7 +119,7 @@ fi
 # 提交更改
 log_info "📦 提交版本更改..."
 if [ "$DRY_RUN" = false ]; then
-    git add Cargo.toml
+    git add Cargo.toml Cargo.lock
     if [ -f "CHANGELOG.md" ]; then
         git add CHANGELOG.md
     fi

@@ -98,7 +98,7 @@ if (-not $DryRun) {
 # 提交更改
 Write-Info "📦 提交版本更改..."
 if (-not $DryRun) {
-    git add Cargo.toml
+    git add Cargo.toml Cargo.lock
     if (Test-Path "CHANGELOG.md") {
         git add CHANGELOG.md
     }
