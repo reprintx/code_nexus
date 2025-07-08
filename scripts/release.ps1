@@ -79,16 +79,7 @@ if (-not $DryRun) {
     Write-Success "✅ 所有测试通过"
 }
 
-# 构建项目
-Write-Info "🔨 构建项目..."
-if (-not $DryRun) {
-    cargo build --release
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "❌ 构建失败，取消发布"
-        exit 1
-    }
-    Write-Success "✅ 构建成功"
-}
+
 
 # 生成 changelog
 Write-Info "📋 生成 changelog..."

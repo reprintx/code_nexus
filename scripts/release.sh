@@ -101,15 +101,7 @@ if [ "$DRY_RUN" = false ]; then
     log_success "✅ 所有测试通过"
 fi
 
-# 构建项目
-log_info "🔨 构建项目..."
-if [ "$DRY_RUN" = false ]; then
-    if ! cargo build --release; then
-        log_error "❌ 构建失败，取消发布"
-        exit 1
-    fi
-    log_success "✅ 构建成功"
-fi
+
 
 # 生成 changelog
 log_info "📋 生成 changelog..."
