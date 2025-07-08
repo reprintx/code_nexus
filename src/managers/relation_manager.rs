@@ -112,11 +112,9 @@ impl RelationManager {
 
     /// 移除文件关联关系
     pub async fn remove_relation(&mut self,
-                                 absolute_from_file: &Path, relative_from_file: &str,
-                                 absolute_to_file: &Path, relative_to_file: &str) -> Result<()> {
-        // 验证文件路径
-        self.validate_file_path(absolute_from_file)?;
-        self.validate_file_path(absolute_to_file)?;
+                                 _absolute_from_file: &Path, relative_from_file: &str,
+                                 _absolute_to_file: &Path, relative_to_file: &str) -> Result<()> {
+        // 对于删除操作，不验证文件是否存在，因为文件可能已被删除但数据库中还有记录
 
         // 检查关联关系是否存在（使用相对路径）
         let relations = self.file_relations.get_mut(relative_from_file)

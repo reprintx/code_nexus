@@ -148,9 +148,8 @@ impl TagManager {
     }
 
     /// 移除文件标签
-    pub async fn remove_tags(&mut self, absolute_file_path: &Path, relative_file_path: &str, tags: Vec<String>) -> Result<()> {
-        // 验证文件路径（使用绝对路径）
-        self.validate_file_path(absolute_file_path)?;
+    pub async fn remove_tags(&mut self, _absolute_file_path: &Path, relative_file_path: &str, tags: Vec<String>) -> Result<()> {
+        // 对于删除操作，不验证文件是否存在，因为文件可能已被删除但数据库中还有记录
 
         // 先检查文件是否存在标签（使用相对路径）
         if !self.file_tags.contains_key(relative_file_path) {

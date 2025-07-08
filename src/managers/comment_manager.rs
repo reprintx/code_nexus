@@ -112,6 +112,7 @@ impl CommentManager {
 
     /// 删除文件注释
     pub async fn delete_comment(&mut self, file_path: &str) -> Result<()> {
+        // 对于删除操作，不验证文件是否存在，因为文件可能已被删除但数据库中还有记录
         if let Some(_) = self.file_comments.remove(file_path) {
             self.save_to_storage().await?;
             info!("删除了文件 {} 的注释", file_path);

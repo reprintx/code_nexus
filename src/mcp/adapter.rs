@@ -294,7 +294,7 @@ impl CodeNexusServer {
         debug_log_with_project!(&params.project_path, "移除文件标签 - 项目路径: {}, 文件路径: {}, 标签: {:?}",
                    params.project_path, params.file_path, params.tags);
 
-        // 验证路径并获取项目管理器
+        // 验证项目路径
         let validated_path = match validate_project_path(&params.project_path) {
             Ok(path) => {
                 debug_log_with_project!(&params.project_path, "项目路径验证成功: {}", path.display());
@@ -303,13 +303,9 @@ impl CodeNexusServer {
             Err(e) => return format!("项目路径验证失败: {}", e),
         };
 
-        let full_file_path = match validate_file_path(&validated_path, &params.file_path) {
-            Ok(path) => {
-                debug_log_with_project!(&params.project_path, "文件路径验证成功: {}", path.display());
-                path
-            },
-            Err(e) => return format!("文件路径验证失败: {}", e),
-        };
+        // 对于删除操作，不验证文件是否存在，因为文件可能已被删除但数据库中还有记录
+        let full_file_path = validated_path.join(&params.file_path);
+        debug_log_with_project!(&params.project_path, "构建文件路径: {}", full_file_path.display());
 
         let normalized_path = match normalize_file_path(&validated_path, &full_file_path) {
             Ok(path) => {
@@ -590,7 +586,7 @@ impl CodeNexusServer {
         debug_log_with_project!(&params.project_path, "移除文件关联关系 - 项目路径: {}, 源文件: {}, 目标文件: {}",
                    params.project_path, params.from_file, params.to_file);
 
-        // 验证路径
+        // 验证项目路径
         let validated_path = match validate_project_path(&params.project_path) {
             Ok(path) => {
                 debug_log_with_project!(&params.project_path, "项目路径验证成功: {}", path.display());
@@ -599,21 +595,11 @@ impl CodeNexusServer {
             Err(e) => return format!("项目路径验证失败: {}", e),
         };
 
-        let from_file_path = match validate_file_path(&validated_path, &params.from_file) {
-            Ok(path) => {
-                debug_log_with_project!(&params.project_path, "源文件路径验证成功: {}", path.display());
-                path
-            },
-            Err(e) => return format!("源文件路径验证失败: {}", e),
-        };
-
-        let to_file_path = match validate_file_path(&validated_path, &params.to_file) {
-            Ok(path) => {
-                debug_log_with_project!(&params.project_path, "目标文件路径验证成功: {}", path.display());
-                path
-            },
-            Err(e) => return format!("目标文件路径验证失败: {}", e),
-        };
+        // 对于删除操作，不验证文件是否存在，因为文件可能已被删除但数据库中还有记录
+        let from_file_path = validated_path.join(&params.from_file);
+        let to_file_path = validated_path.join(&params.to_file);
+        debug_log_with_project!(&params.project_path, "构建源文件路径: {}", from_file_path.display());
+        debug_log_with_project!(&params.project_path, "构建目标文件路径: {}", to_file_path.display());
 
         let normalized_from = match normalize_file_path(&validated_path, &from_file_path) {
             Ok(path) => {
