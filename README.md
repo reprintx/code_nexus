@@ -7,7 +7,7 @@ CodeNexus 是一个基于 Rust 和 Model Context Protocol (MCP) 的代码库关�
 - **标签管理**: 为文件添加结构化标签 (type:value 格式)
 - **注释系统**: 为文件添加描述性注释
 - **关联关系**: 建立文件间的依赖和关联关系
-- **智能查询**: 支持复杂的标签查询和关系搜索
+- **智能查询**: 支持复杂的标签查询（AND、OR、NOT、通配符）和关系搜索
 - **多项目支持**: 同时管理多个项目，每个项目独立存储
 - **路径验证**: 确保文件路径安全性和有效性
 - **MCP 集成**: 通过 MCP 协议与 AI 助手无缝集成
@@ -68,6 +68,14 @@ query_files_by_tags({
   "query": "category:api AND status:active"
 })
 
+# 支持的查询语法：
+# - 单标签查询: "category:api"
+# - AND操作: "category:api AND status:active"
+# - OR操作: "type:manager OR type:adapter"
+# - NOT操作: "NOT module:core"
+# - 通配符: "module:*", "type:*"
+# - 复合查询: "(type:manager OR type:adapter) AND NOT module:core"
+
 # 获取所有标签
 get_all_tags({
   "project_path": "/path/to/your/project"
@@ -90,6 +98,42 @@ update_file_comment({
   "file_path": "src/api/user.rs",
   "comment": "用户管理API，支持OAuth登录"
 })
+```
+
+## 查询语法
+
+CodeNexus 支持强大的查询语法，可以进行复杂的标签搜索：
+
+### 基本查询
+- **单标签查询**: `category:api`
+- **精确匹配**: `status:active`
+
+### 逻辑操作符
+- **AND操作**: `category:api AND status:active`
+- **OR操作**: `type:manager OR type:adapter`
+- **NOT操作**: `NOT module:core`
+
+### 通配符
+- **匹配所有**: `module:*` (匹配所有module标签)
+- **前缀匹配**: `type:manage*` (匹配type:manager等)
+
+### 复合查询
+- **组合查询**: `(type:manager OR type:adapter) AND NOT module:core`
+- **嵌套查询**: `layer:business AND (type:manager OR type:query)`
+
+### 查询示例
+```bash
+# 查找所有业务层的管理器文件
+query_files_by_tags({"query": "layer:business AND type:manager"})
+
+# 查找非核心模块的所有文件
+query_files_by_tags({"query": "NOT module:core"})
+
+# 查找管理器或适配器类型的文件
+query_files_by_tags({"query": "type:manager OR type:adapter"})
+
+# 查找所有模块的文件（通配符）
+query_files_by_tags({"query": "module:*"})
 ```
 
 ### 关联关系
