@@ -123,7 +123,7 @@ if [ "$DRY_RUN" = false ]; then
     if [ -f "CHANGELOG.md" ]; then
         git add CHANGELOG.md
     fi
-    git commit -m "chore: bump version to $VERSION"
+    git commit -m ":bookmark: 发布版本 $VERSION"
     log_success "✅ 版本更改已提交"
 fi
 

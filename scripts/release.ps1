@@ -102,7 +102,7 @@ if (-not $DryRun) {
     if (Test-Path "CHANGELOG.md") {
         git add CHANGELOG.md
     }
-    git commit -m "chore: bump version to $Version"
+    git commit -m ":bookmark: 发布版本 $Version"
     Write-Success "✅ 版本更改已提交"
 }
 
