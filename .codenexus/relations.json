@@ -1,3 +1,156 @@
 {
-  "file_relations": {}
+  "file_relations": {
+    "src/lib.rs": [
+      {
+        "target": "src/error.rs",
+        "description": "导出错误类型和结果类型，提供统一的错误处理接口"
+      },
+      {
+        "target": "src/mcp/mod.rs",
+        "description": "导出MCP服务器类型，作为主要的对外接口"
+      },
+      {
+        "target": "src/models.rs",
+        "description": "导入核心数据模型定义"
+      },
+      {
+        "target": "src/storage/mod.rs",
+        "description": "导入存储层模块"
+      },
+      {
+        "target": "src/managers/mod.rs",
+        "description": "导入业务逻辑管理器模块"
+      },
+      {
+        "target": "src/query/mod.rs",
+        "description": "导入查询引擎模块"
+      },
+      {
+        "target": "src/utils.rs",
+        "description": "导入工具函数模块"
+      }
+    ],
+    "src/mcp/adapter.rs": [
+      {
+        "target": "src/managers/mod.rs",
+        "description": "调用业务管理器，实现MCP工具的具体功能"
+      },
+      {
+        "target": "src/models.rs",
+        "description": "使用数据模型定义，处理MCP工具的输入输出参数"
+      },
+      {
+        "target": "src/error.rs",
+        "description": "使用统一错误处理，转换内部错误为MCP响应"
+      }
+    ],
+    "src/managers/tag_manager.rs": [
+      {
+        "target": "src/storage/mod.rs",
+        "description": "依赖存储层，实现标签数据的持久化操作"
+      },
+      {
+        "target": "src/models.rs",
+        "description": "使用数据模型，处理标签相关的数据结构"
+      }
+    ],
+    "src/managers/relation_manager.rs": [
+      {
+        "target": "src/storage/mod.rs",
+        "description": "依赖存储层，实现关系数据的持久化操作"
+      },
+      {
+        "target": "src/models.rs",
+        "description": "使用数据模型，处理关系相关的数据结构"
+      }
+    ],
+    "src/storage/json_storage.rs": [
+      {
+        "target": "src/models.rs",
+        "description": "使用数据模型，序列化和反序列化存储数据"
+      },
+      {
+        "target": "src/error.rs",
+        "description": "使用错误处理，转换IO和序列化错误"
+      },
+      {
+        "target": "src/utils.rs",
+        "description": "使用工具函数，处理路径操作和文件系统交互"
+      }
+    ],
+    "src/storage/mod.rs": [
+      {
+        "target": "src/storage/json_storage.rs",
+        "description": "导出JSON存储实现，提供具体的数据持久化功能"
+      }
+    ],
+    "src/query/mod.rs": [
+      {
+        "target": "src/query/engine.rs",
+        "description": "导出查询引擎实现，提供智能搜索功能"
+      }
+    ],
+    "tests/integration_tests.rs": [
+      {
+        "target": "src/lib.rs",
+        "description": "测试库的公共接口，验证整体功能"
+      },
+      {
+        "target": "src/mcp/mod.rs",
+        "description": "测试MCP服务器功能，验证工具接口"
+      }
+    ],
+    "src/managers/comment_manager.rs": [
+      {
+        "target": "src/storage/mod.rs",
+        "description": "依赖存储层，实现注释数据的持久化操作"
+      },
+      {
+        "target": "src/models.rs",
+        "description": "使用数据模型，处理注释相关的数据结构"
+      }
+    ],
+    "src/mcp/mod.rs": [
+      {
+        "target": "src/mcp/adapter.rs",
+        "description": "导出MCP适配器实现，提供CodeNexusServer类型"
+      }
+    ],
+    "src/query/engine.rs": [
+      {
+        "target": "src/managers/mod.rs",
+        "description": "调用管理器，获取标签和关系数据进行查询"
+      },
+      {
+        "target": "src/models.rs",
+        "description": "使用数据模型，处理查询结果和参数"
+      }
+    ],
+    "examples/multi_project_usage.rs": [
+      {
+        "target": "src/lib.rs",
+        "description": "使用库的公共接口，演示实际使用场景"
+      }
+    ],
+    "src/main.rs": [
+      {
+        "target": "src/lib.rs",
+        "description": "依赖库入口点，导入CodeNexusServer类型"
+      }
+    ],
+    "src/managers/mod.rs": [
+      {
+        "target": "src/managers/tag_manager.rs",
+        "description": "导出标签管理器，提供标签相关的业务逻辑"
+      },
+      {
+        "target": "src/managers/comment_manager.rs",
+        "description": "导出注释管理器，提供注释相关的业务逻辑"
+      },
+      {
+        "target": "src/managers/relation_manager.rs",
+        "description": "导出关系管理器，提供文件关联关系的业务逻辑"
+      }
+    ]
+  }
 }

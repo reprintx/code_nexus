@@ -101,30 +101,29 @@ impl TagManager {
         Ok(())
     }
 
-    /// 验证文件路径
-    fn validate_file_path(&self, file_path: &str) -> Result<()> {
-        let path = Path::new(file_path);
-        if !path.exists() {
-            return Err(CodeNexusError::FileNotFound(file_path.to_string()));
+    /// 验证文件路径（使用绝对路径）
+    fn validate_file_path(&self, absolute_file_path: &Path) -> Result<()> {
+        if !absolute_file_path.exists() {
+            return Err(CodeNexusError::FileNotFound(absolute_file_path.to_string_lossy().to_string()));
         }
         Ok(())
     }
 
     /// 为文件添加标签
-    pub async fn add_tags(&mut self, file_path: &str, tags: Vec<String>) -> Result<()> {
-        // 验证文件路径
-        self.validate_file_path(file_path)?;
+    pub async fn add_tags(&mut self, absolute_file_path: &Path, relative_file_path: &str, tags: Vec<String>) -> Result<()> {
+        // 验证文件路径（使用绝对路径）
+        self.validate_file_path(absolute_file_path)?;
 
         // 验证标签格式
         for tag in &tags {
             self.validate_tag(tag)?;
         }
 
-        // 更新内存数据
+        // 更新内存数据（使用相对路径存储）
         let mut added_tags = Vec::new();
 
         // 先获取或创建文件标签集合
-        let file_tags = self.file_tags.entry(file_path.to_string()).or_default();
+        let file_tags = self.file_tags.entry(relative_file_path.to_string()).or_default();
 
         for tag in tags {
             if file_tags.insert(tag.clone()) {
@@ -134,43 +133,46 @@ impl TagManager {
 
         // 更新索引（在借用结束后）
         for tag in &added_tags {
-            self.update_indices(tag, file_path);
+            self.update_indices(tag, relative_file_path);
         }
 
         if !added_tags.is_empty() {
             // 保存到存储
             self.save_to_storage().await?;
-            info!("为文件 {} 添加了 {} 个标签: {:?}", file_path, added_tags.len(), added_tags);
+            info!("为文件 {} 添加了 {} 个标签: {:?}", relative_file_path, added_tags.len(), added_tags);
         } else {
-            debug!("文件 {} 的标签没有变化", file_path);
+            debug!("文件 {} 的标签没有变化", relative_file_path);
         }
 
         Ok(())
     }
 
     /// 移除文件标签
-    pub async fn remove_tags(&mut self, file_path: &str, tags: Vec<String>) -> Result<()> {
-        // 先检查文件是否存在标签
-        if !self.file_tags.contains_key(file_path) {
-            return Err(CodeNexusError::FileNotFound(file_path.to_string()));
+    pub async fn remove_tags(&mut self, absolute_file_path: &Path, relative_file_path: &str, tags: Vec<String>) -> Result<()> {
+        // 验证文件路径（使用绝对路径）
+        self.validate_file_path(absolute_file_path)?;
+
+        // 先检查文件是否存在标签（使用相对路径）
+        if !self.file_tags.contains_key(relative_file_path) {
+            return Err(CodeNexusError::FileNotFound(relative_file_path.to_string()));
         }
 
         let mut removed_tags = Vec::new();
 
         // 验证所有标签都存在
         for tag in &tags {
-            if let Some(file_tags) = self.file_tags.get(file_path) {
+            if let Some(file_tags) = self.file_tags.get(relative_file_path) {
                 if !file_tags.contains(tag) {
                     return Err(CodeNexusError::TagNotFound {
                         tag: tag.clone(),
-                        file: file_path.to_string(),
+                        file: relative_file_path.to_string(),
                     });
                 }
             }
         }
 
         // 移除标签
-        if let Some(file_tags) = self.file_tags.get_mut(file_path) {
+        if let Some(file_tags) = self.file_tags.get_mut(relative_file_path) {
             for tag in tags {
                 if file_tags.remove(&tag) {
                     removed_tags.push(tag);
@@ -180,19 +182,19 @@ impl TagManager {
 
         // 更新索引
         for tag in &removed_tags {
-            self.remove_from_indices(tag, file_path);
+            self.remove_from_indices(tag, relative_file_path);
         }
 
         // 如果文件没有标签了，移除文件记录
-        if let Some(file_tags) = self.file_tags.get(file_path) {
+        if let Some(file_tags) = self.file_tags.get(relative_file_path) {
             if file_tags.is_empty() {
-                self.file_tags.remove(file_path);
+                self.file_tags.remove(relative_file_path);
             }
         }
 
         if !removed_tags.is_empty() {
             self.save_to_storage().await?;
-            info!("从文件 {} 移除了 {} 个标签: {:?}", file_path, removed_tags.len(), removed_tags);
+            info!("从文件 {} 移除了 {} 个标签: {:?}", relative_file_path, removed_tags.len(), removed_tags);
         }
 
         Ok(())

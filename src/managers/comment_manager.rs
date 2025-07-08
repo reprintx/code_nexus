@@ -29,11 +29,10 @@ impl CommentManager {
         Ok(())
     }
 
-    /// 验证文件路径
-    fn validate_file_path(&self, file_path: &str) -> Result<()> {
-        let path = Path::new(file_path);
-        if !path.exists() {
-            return Err(CodeNexusError::FileNotFound(file_path.to_string()));
+    /// 验证文件路径（使用绝对路径）
+    fn validate_file_path(&self, absolute_file_path: &Path) -> Result<()> {
+        if !absolute_file_path.exists() {
+            return Err(CodeNexusError::FileNotFound(absolute_file_path.to_string_lossy().to_string()));
         }
         Ok(())
     }
@@ -47,44 +46,44 @@ impl CommentManager {
     }
 
     /// 为文件添加注释
-    pub async fn add_comment(&mut self, file_path: &str, comment: &str) -> Result<()> {
+    pub async fn add_comment(&mut self, absolute_file_path: &Path, relative_file_path: &str, comment: &str) -> Result<()> {
         // 验证输入
-        self.validate_file_path(file_path)?;
+        self.validate_file_path(absolute_file_path)?;
         self.validate_comment(comment)?;
 
-        // 检查是否已存在注释
-        if self.file_comments.contains_key(file_path) {
+        // 检查是否已存在注释（使用相对路径）
+        if self.file_comments.contains_key(relative_file_path) {
             return Err(CodeNexusError::ConfigError(
-                format!("文件 {} 已存在注释，请使用 update_comment 更新", file_path)
+                format!("文件 {} 已存在注释，请使用 update_comment 更新", relative_file_path)
             ));
         }
 
-        // 添加注释
-        self.file_comments.insert(file_path.to_string(), comment.to_string());
+        // 添加注释（使用相对路径存储）
+        self.file_comments.insert(relative_file_path.to_string(), comment.to_string());
 
         // 保存到存储
         self.save_to_storage().await?;
-        info!("为文件 {} 添加了注释", file_path);
+        info!("为文件 {} 添加了注释", relative_file_path);
 
         Ok(())
     }
 
     /// 更新文件注释
-    pub async fn update_comment(&mut self, file_path: &str, comment: &str) -> Result<()> {
+    pub async fn update_comment(&mut self, absolute_file_path: &Path, relative_file_path: &str, comment: &str) -> Result<()> {
         // 验证输入
-        self.validate_file_path(file_path)?;
+        self.validate_file_path(absolute_file_path)?;
         self.validate_comment(comment)?;
 
-        // 更新注释
-        let old_comment = self.file_comments.insert(file_path.to_string(), comment.to_string());
+        // 更新注释（使用相对路径存储）
+        let old_comment = self.file_comments.insert(relative_file_path.to_string(), comment.to_string());
 
         // 保存到存储
         self.save_to_storage().await?;
 
         if old_comment.is_some() {
-            info!("更新了文件 {} 的注释", file_path);
+            info!("更新了文件 {} 的注释", relative_file_path);
         } else {
-            info!("为文件 {} 添加了注释", file_path);
+            info!("为文件 {} 添加了注释", relative_file_path);
         }
 
         Ok(())

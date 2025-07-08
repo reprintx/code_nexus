@@ -1,3 +1,107 @@
 {
-  "file_tags": {}
+  "file_tags": {
+    "src/storage/mod.rs": [
+      "module:storage",
+      "type:storage",
+      "layer:storage",
+      "role:module_export"
+    ],
+    "src/main.rs": [
+      "layer:presentation",
+      "module:core",
+      "role:interface",
+      "role:entry_point",
+      "type:entry"
+    ],
+    "src/query/engine.rs": [
+      "layer:business",
+      "role:query_engine",
+      "module:query",
+      "type:query"
+    ],
+    "src/models.rs": [
+      "module:core",
+      "role:data_model",
+      "type:model",
+      "layer:data"
+    ],
+    "examples/multi_project_usage.rs": [
+      "module:examples",
+      "layer:presentation",
+      "type:example",
+      "role:demo"
+    ],
+    "src/error.rs": [
+      "module:error",
+      "role:error_handling",
+      "type:error",
+      "layer:data"
+    ],
+    "src/managers/relation_manager.rs": [
+      "layer:business",
+      "type:manager",
+      "role:business_logic",
+      "module:managers"
+    ],
+    "src/query/mod.rs": [
+      "module:query",
+      "type:query",
+      "layer:business",
+      "role:module_export"
+    ],
+    "src/managers/comment_manager.rs": [
+      "module:managers",
+      "layer:business",
+      "role:business_logic",
+      "type:manager"
+    ],
+    "src/mcp/adapter.rs": [
+      "module:mcp",
+      "type:adapter",
+      "layer:interface",
+      "role:protocol_adapter"
+    ],
+    "src/mcp/mod.rs": [
+      "role:module_export",
+      "module:mcp",
+      "type:adapter",
+      "layer:interface"
+    ],
+    "src/utils.rs": [
+      "module:utils",
+      "type:util",
+      "role:utility",
+      "layer:data"
+    ],
+    "src/managers/mod.rs": [
+      "module:managers",
+      "type:manager",
+      "layer:business",
+      "role:module_export"
+    ],
+    "src/lib.rs": [
+      "type:library",
+      "layer:interface",
+      "role:module_export",
+      "module:core"
+    ],
+    "src/managers/tag_manager.rs": [
+      "layer:business",
+      "role:business_logic",
+      "type:manager",
+      "module:managers"
+    ],
+    "tests/integration_tests.rs": [
+      "role:integration_test",
+      "module:test",
+      "layer:interface",
+      "type:test"
+    ],
+    "src/storage/json_storage.rs": [
+      "type:storage",
+      "layer:storage",
+      "module:storage",
+      "role:persistence"
+    ]
+  }
 }

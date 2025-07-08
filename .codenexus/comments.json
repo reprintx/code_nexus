@@ -1,3 +1,21 @@
 {
-  "file_comments": {}
+  "file_comments": {
+    "src/query/mod.rs": "查询引擎模块导出，提供智能搜索和查询功能的统一接口",
+    "tests/integration_tests.rs": "集成测试套件，验证整个系统的端到端功能，包括多项目支持、MCP工具接口和数据一致性",
+    "src/lib.rs": "CodeNexus库的主入口点，负责导出所有核心模块和类型定义，为外部使用者提供统一的API接口",
+    "src/managers/tag_manager.rs": "标签管理器，负责文件标签的增删改查操作，支持复杂的标签查询表达式解析和匹配",
+    "src/storage/mod.rs": "存储层模块导出，定义数据持久化的统一接口和具体实现",
+    "src/main.rs": "MCP服务器的启动入口点，负责初始化日志系统、创建CodeNexus服务器实例并启动stdio传输协议",
+    "src/storage/json_storage.rs": "JSON文件存储实现，提供基于文件系统的数据持久化功能，支持多项目隔离存储",
+    "src/managers/mod.rs": "业务逻辑管理器模块导出，包含标签、注释、关系管理的核心业务逻辑",
+    "src/managers/comment_manager.rs": "注释管理器，负责文件注释的添加、更新和删除操作，提供文件描述信息的管理功能",
+    "src/mcp/adapter.rs": "MCP协议适配器实现，将内部业务逻辑转换为MCP工具接口，提供13个标准化的代码管理工具",
+    "examples/multi_project_usage.rs": "多项目使用示例，演示如何在不同项目中使用CodeNexus的各种功能",
+    "src/models.rs": "定义系统核心数据模型，包括文件信息、关联关系、标签查询参数等结构体，支持序列化和JSON Schema生成",
+    "src/mcp/mod.rs": "MCP协议适配器模块导出，提供与外部系统交互的标准化接口",
+    "src/query/engine.rs": "智能查询引擎实现，提供基于标签的高级搜索功能，支持复杂查询表达式和模糊匹配",
+    "src/managers/relation_manager.rs": "关系管理器，负责文件间关联关系的建立、查询和删除，支持双向关系维护和关系图构建",
+    "src/utils.rs": "提供系统通用的工具函数，包括路径处理、文件操作、字符串处理等辅助功能",
+    "src/error.rs": "定义系统统一的错误类型和结果类型，提供错误处理的标准化接口，支持从各种底层错误类型的转换"
+  }
 }

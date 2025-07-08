@@ -48,11 +48,10 @@ impl RelationManager {
         }
     }
 
-    /// 验证文件路径
-    fn validate_file_path(&self, file_path: &str) -> Result<()> {
-        let path = Path::new(file_path);
-        if !path.exists() {
-            return Err(CodeNexusError::FileNotFound(file_path.to_string()));
+    /// 验证文件路径（使用绝对路径）
+    fn validate_file_path(&self, absolute_file_path: &Path) -> Result<()> {
+        if !absolute_file_path.exists() {
+            return Err(CodeNexusError::FileNotFound(absolute_file_path.to_string_lossy().to_string()));
         }
         Ok(())
     }
@@ -66,84 +65,93 @@ impl RelationManager {
     }
 
     /// 添加文件关联关系
-    pub async fn add_relation(&mut self, from_file: &str, to_file: &str, description: &str) -> Result<()> {
+    pub async fn add_relation(&mut self,
+                              absolute_from_file: &Path, relative_from_file: &str,
+                              absolute_to_file: &Path, relative_to_file: &str,
+                              description: &str) -> Result<()> {
         // 验证输入
-        self.validate_file_path(from_file)?;
-        self.validate_file_path(to_file)?;
+        self.validate_file_path(absolute_from_file)?;
+        self.validate_file_path(absolute_to_file)?;
         self.validate_description(description)?;
 
-        // 检查是否已存在相同的关联关系
-        if let Some(relations) = self.file_relations.get(from_file) {
+        // 检查是否已存在相同的关联关系（使用相对路径）
+        if let Some(relations) = self.file_relations.get(relative_from_file) {
             for relation in relations {
-                if relation.target == to_file {
+                if relation.target == relative_to_file {
                     return Err(CodeNexusError::RelationAlreadyExists {
-                        from: from_file.to_string(),
-                        to: to_file.to_string(),
+                        from: relative_from_file.to_string(),
+                        to: relative_to_file.to_string(),
                     });
                 }
             }
         }
 
-        // 添加关联关系
+        // 添加关联关系（使用相对路径存储）
         let new_relation = Relation {
-            target: to_file.to_string(),
+            target: relative_to_file.to_string(),
             description: description.to_string(),
         };
 
         self.file_relations
-            .entry(from_file.to_string())
+            .entry(relative_from_file.to_string())
             .or_default()
             .push(new_relation);
 
         // 更新反向索引
         self.incoming_relations
-            .entry(to_file.to_string())
+            .entry(relative_to_file.to_string())
             .or_default()
-            .push((from_file.to_string(), description.to_string()));
+            .push((relative_from_file.to_string(), description.to_string()));
 
         // 保存到存储
         self.save_to_storage().await?;
-        info!("添加了关联关系: {} -> {} ({})", from_file, to_file, description);
+        info!("添加了关联关系: {} -> {} ({})", relative_from_file, relative_to_file, description);
 
         Ok(())
     }
 
     /// 移除文件关联关系
-    pub async fn remove_relation(&mut self, from_file: &str, to_file: &str) -> Result<()> {
-        // 检查关联关系是否存在
-        let relations = self.file_relations.get_mut(from_file)
+    pub async fn remove_relation(&mut self,
+                                 absolute_from_file: &Path, relative_from_file: &str,
+                                 absolute_to_file: &Path, relative_to_file: &str) -> Result<()> {
+        // 验证文件路径
+        self.validate_file_path(absolute_from_file)?;
+        self.validate_file_path(absolute_to_file)?;
+
+        // 检查关联关系是否存在（使用相对路径）
+        let relations = self.file_relations.get_mut(relative_from_file)
             .ok_or_else(|| CodeNexusError::RelationNotFound {
-                from: from_file.to_string(),
-                to: to_file.to_string(),
+                from: relative_from_file.to_string(),
+                to: relative_to_file.to_string(),
             })?;
 
         // 查找并移除关联关系
         let initial_len = relations.len();
-        relations.retain(|relation| relation.target != to_file);
+        relations.retain(|relation| relation.target != relative_to_file);
 
         if relations.len() == initial_len {
             return Err(CodeNexusError::RelationNotFound {
-                from: from_file.to_string(),
-                to: to_file.to_string(),
+                from: relative_from_file.to_string(),
+                to: relative_to_file.to_string(),
             });
         }
 
         // 如果文件没有关联关系了，移除文件记录
         if relations.is_empty() {
-            self.file_relations.remove(from_file);
+            self.file_relations.remove(relative_from_file);
         }
 
         // 更新反向索引
-        if let Some(incoming) = self.incoming_relations.get_mut(to_file) {
-            incoming.retain(|(from, _)| from != from_file);
+        if let Some(incoming) = self.incoming_relations.get_mut(relative_to_file) {
+            incoming.retain(|(from, _)| from != relative_from_file);
             if incoming.is_empty() {
-                self.incoming_relations.remove(to_file);
+                self.incoming_relations.remove(relative_to_file);
             }
         }
 
         // 保存到存储
         self.save_to_storage().await?;
-        info!("移除了关联关系: {} -> {}", from_file, to_file);
+        info!("移除了关联关系: {} -> {}", relative_from_file, relative_to_file);
 
         Ok(())
     }
